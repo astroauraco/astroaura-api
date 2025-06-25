@@ -7,16 +7,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Token caching
 let cachedToken = null;
 let tokenExpiry = null;
 
-// Get Prokerala Access Token
 async function getAccessToken() {
   const now = Date.now();
-  if (cachedToken && tokenExpiry && now < tokenExpiry) {
-    return cachedToken;
-  }
+  if (cachedToken && tokenExpiry && now < tokenExpiry) return cachedToken;
 
   const params = new URLSearchParams();
   params.append('grant_type', 'client_credentials');
@@ -30,34 +26,32 @@ async function getAccessToken() {
   return cachedToken;
 }
 
-// POST /natal-chart – fetch Western natal chart
 app.post('/natal-chart', async (req, res) => {
   const { datetime, coordinates } = req.body;
+  if (!datetime || !coordinates) {
+    return res.status(400).json({ error: 'Missing datetime or coordinates' });
+  }
 
   try {
-    const accessToken = await getAccessToken();
+    const token = await getAccessToken();
     const [lat, lon] = coordinates.split(',');
 
     const response = await axios.get('https://api.prokerala.com/v2/astrology/chart', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
       params: {
         datetime,
-        latitude: lat.trim(),
-        longitude: lon.trim(),
+        latitude: lat,
+        longitude: lon,
         system: 'western',
       },
     });
 
     res.json(response.data);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const message = error.response?.data?.message || error.message || 'Unknown error';
+    res.status(500).json({ error: message });
   }
 });
 
-// Start server
-app.listen(3000, () => {
-  console.log('✅ Server running on http://localhost:3000');
-});
-
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🔮 AstroAura API running on port ${PORT}`));
