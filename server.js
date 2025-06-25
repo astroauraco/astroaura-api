@@ -28,31 +28,22 @@ async function getAccessToken() {
 
 app.post('/natal-chart', async (req, res) => {
   const { datetime, coordinates } = req.body;
-  if (!datetime || !coordinates) {
-    return res.status(400).json({ error: 'Missing datetime or coordinates' });
-  }
 
   try {
     const token = await getAccessToken();
-    const [latitude, longitude] = coordinates.split(',');
-
-    const response = await axios.get('https://api.prokerala.com/v2/astrology/natal-chart', {
+    const response = await axios.get('https://api.prokerala.com/v2/astrology/kundli', {
       headers: { Authorization: `Bearer ${token}` },
       params: {
+        ayanamsa: 1,
         datetime,
-        latitude,
-        longitude,
-        system: 'western',
+        coordinates,
       },
     });
 
     res.json(response.data);
   } catch (error) {
-    console.error('Prokerala error:', error.response?.data || error.message);
-    const message = error.response?.data?.message || error.message || 'Unknown error';
-    res.status(500).json({ error: message });
+    res.status(500).json({ error: error.message });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🔮 AstroAura API running on port ${PORT}`));
+app.listen(3000, () => console.log('Server running on http://localhost:3000'));
