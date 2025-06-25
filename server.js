@@ -34,20 +34,21 @@ app.post('/natal-chart', async (req, res) => {
 
   try {
     const token = await getAccessToken();
-    const [lat, lon] = coordinates.split(',');
+    const [latitude, longitude] = coordinates.split(',');
 
     const response = await axios.get('https://api.prokerala.com/v2/astrology/natal-chart', {
       headers: { Authorization: `Bearer ${token}` },
       params: {
         datetime,
-        latitude: lat,
-        longitude: lon,
+        latitude,
+        longitude,
         system: 'western',
       },
     });
 
     res.json(response.data);
   } catch (error) {
+    console.error('Prokerala error:', error.response?.data || error.message);
     const message = error.response?.data?.message || error.message || 'Unknown error';
     res.status(500).json({ error: message });
   }
