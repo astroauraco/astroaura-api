@@ -1,14 +1,10 @@
-const cors = require('cors'); // <== ADD THIS
-
-const app = express();
-app.use(cors()); // <== ADD THIS
-app.use(express.json());
-
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 let cachedToken = null;
