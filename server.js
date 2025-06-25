@@ -30,15 +30,15 @@ app.post('/natal-chart', async (req, res) => {
   const { datetime, coordinates } = req.body;
 
   try {
-    const token = await getAccessToken();
-    const response = await axios.get('https://api.prokerala.com/v2/astrology/chart', {
-      headers: { Authorization: `Bearer ${token}` },
-      params: {
-        ayanamsa: 1,
-        datetime,
-        coordinates,
-      },
-    });
+const response = await axios.get('https://api.prokerala.com/v2/astrology/chart', {
+  headers: { Authorization: `Bearer ${token}` },
+  params: {
+    datetime,
+    coordinates,
+    system: 'western', // optional, just to be sure
+  },
+});
+
 
     res.json(response.data);
   } catch (error) {
