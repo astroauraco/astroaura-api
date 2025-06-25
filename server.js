@@ -36,7 +36,7 @@ app.post('/natal-chart', async (req, res) => {
     const token = await getAccessToken();
     const [lat, lon] = coordinates.split(',');
 
-    const response = await axios.get('https://api.prokerala.com/v2/astrology/western/natal-chart', {
+    const response = await axios.get('https://api.prokerala.com/v2/astrology/natal-chart', {
       headers: { Authorization: `Bearer ${token}` },
       params: {
         datetime,
