@@ -7,12 +7,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Token caching
 let cachedToken = null;
 let tokenExpiry = null;
 
+// Get Prokerala Access Token
 async function getAccessToken() {
   const now = Date.now();
-  if (cachedToken && tokenExpiry && now < tokenExpiry) return cachedToken;
+  if (cachedToken && tokenExpiry && now < tokenExpiry) {
+    return cachedToken;
+  }
 
   const params = new URLSearchParams();
   params.append('grant_type', 'client_credentials');
@@ -26,20 +30,25 @@ async function getAccessToken() {
   return cachedToken;
 }
 
+// POST /natal-chart – fetch Western natal chart
 app.post('/natal-chart', async (req, res) => {
   const { datetime, coordinates } = req.body;
 
   try {
-const [lat, lon] = coordinates.split(',');
-const response = await axios.get('https://api.prokerala.com/v2/astrology/chart', {
-  headers: { Authorization: `Bearer ${token}` },
-  params: {
-    datetime,
-    latitude: lat,
-    longitude: lon,
-    system: 'western',
-  },
-});
+    const accessToken = await getAccessToken();
+    const [lat, lon] = coordinates.split(',');
+
+    const response = await axios.get('https://api.prokerala.com/v2/astrology/chart', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        datetime,
+        latitude: lat.trim(),
+        longitude: lon.trim(),
+        system: 'western',
+      },
+    });
 
     res.json(response.data);
   } catch (error) {
@@ -47,4 +56,8 @@ const response = await axios.get('https://api.prokerala.com/v2/astrology/chart',
   }
 });
 
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+// Start server
+app.listen(3000, () => {
+  console.log('✅ Server running on http://localhost:3000');
+});
+
