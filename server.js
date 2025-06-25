@@ -1,5 +1,14 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors'); // <== ADD THIS
+require('dotenv').config();
+
+const app = express();
+app.use(cors()); // <== ADD THIS
+app.use(express.json());
+
+const express = require('express');
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
